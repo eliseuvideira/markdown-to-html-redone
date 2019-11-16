@@ -1,0 +1,13 @@
+{
+  "name": "bookmarker-redone",
+  "version": "1.0.0",
+  "main": "app/main.js",
+  "author": "Eliseu Videira <eliseuvideira1@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "1.7"
+  },
+  "scripts": {
+    "start": "node_modules/.bin/electron ."
+  }
+}
