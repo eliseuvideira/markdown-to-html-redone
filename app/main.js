@@ -114,4 +114,5 @@ module.exports = {
   createWindow,
   saveHTML,
   saveMarkdown,
+  openFile,
 };

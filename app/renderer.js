@@ -43,6 +43,14 @@ const updateUserInterface = (isEdited) => {
   btnRevert.disabled = !isEdited;
 };
 
+const getDraggedFile = (event) => event.dataTransfer.items[0];
+
+const getDroppedFile = (event) => event.dataTransfer.files[0];
+
+const fileTypeIsSupported = (file) => {
+  return ['text/plain', 'text/markdown'].includes(file.type);
+};
+
 // ipc Events
 
 ipcRenderer.on('file-opened', (event, file, content) => {
@@ -56,6 +64,11 @@ ipcRenderer.on('file-opened', (event, file, content) => {
 });
 
 // Adding Event Listeners
+
+document.addEventListener('dragstart', (event) => event.preventDefault());
+document.addEventListener('dragover', (event) => event.preventDefault());
+document.addEventListener('dragleave', (event) => event.preventDefault());
+document.addEventListener('drop', (event) => event.preventDefault());
 
 viewMarkdown.addEventListener('keyup', (event) => {
   const currentContent = event.target.value;
@@ -85,4 +98,29 @@ btnSaveMarkdown.addEventListener('click', () => {
 btnRevert.addEventListener('click', () => {
   viewMarkdown.value = originalContent;
   renderMarkdownToHTML(originalContent);
+});
+
+viewMarkdown.addEventListener('dragover', (event) => {
+  const file = getDraggedFile(event);
+  if (fileTypeIsSupported(file)) {
+    viewMarkdown.classList.add('drag-over');
+  } else {
+    viewMarkdown.classList.add('drag-error');
+  }
+});
+
+viewMarkdown.addEventListener('dragleave', () => {
+  viewMarkdown.classList.remove('drag-over');
+  viewMarkdown.classList.remove('drag-error');
+});
+
+viewMarkdown.addEventListener('drop', (event) => {
+  const file = getDroppedFile(event);
+  if (fileTypeIsSupported(file)) {
+    mainProcess.openFile(win, file.path);
+  } else {
+    alert('That file type is not supported');
+  }
+  viewMarkdown.classList.remove('drag-over');
+  viewMarkdown.classList.remove('drag-error');
 });
