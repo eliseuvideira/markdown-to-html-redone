@@ -1,25 +1,27 @@
 const { app, BrowserWindow, dialog } = require('electron');
 const fs = require('fs');
 
-let mainWindow = null;
+const windows = new Set();
 
 app.on('ready', () => {
-  mainWindow = new BrowserWindow({ show: false });
-
-  mainWindow.loadURL(`file://${__dirname}/index.html`);
-
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
-    // mainWindow.webContents.openDevTools();
-  });
-
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
+  createWindow();
 });
 
-const getFileFromUser = () => {
-  const files = dialog.showOpenDialog(mainWindow, {
+app.on('window-all-closed', () => {
+  if (process.platform === 'darwin') {
+    return false;
+  }
+  app.quit();
+});
+
+app.on('activate', (event, hasVisibleWindows) => {
+  if (!hasVisibleWindows) {
+    createWindow();
+  }
+});
+
+const getFileFromUser = (win) => {
+  const files = dialog.showOpenDialog(win, {
     properties: ['openFile'],
     filters: [
       { name: 'Text Files', extensions: ['txt'] },
@@ -28,17 +30,44 @@ const getFileFromUser = () => {
   });
 
   if (files) {
-    openFile(files[0]);
+    openFile(win, files[0]);
   }
 };
 
-const openFile = (file) => {
+const openFile = (win, file) => {
   const content = fs.readFileSync(file).toString();
-  mainWindow.webContents.send('file-opened', file, content);
+  win.webContents.send('file-opened', file, content);
+};
+
+const createWindow = () => {
+  let x, y;
+  const currentWindow = BrowserWindow.getFocusedWindow();
+  if (currentWindow) {
+    const [currentX, currentY] = currentWindow.getPosition();
+    x = currentX + 10;
+    y = currentY + 10;
+  }
+
+  let win = new BrowserWindow({ x, y, show: false });
+
+  win.loadURL(`file://${__dirname}/index.html`);
+
+  win.once('ready-to-show', () => {
+    win.show();
+  });
+
+  win.on('closed', () => {
+    windows.delete(win);
+    win = null;
+  });
+
+  windows.add(win);
+  return win;
 };
 
 // Exports
 
 module.exports = {
   getFileFromUser,
+  createWindow,
 };
