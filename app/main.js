@@ -1,13 +1,17 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow } = require('electron');
 
 let mainWindow = null;
 
-app.on("ready", () => {
-  mainWindow = new BrowserWindow();
+app.on('ready', () => {
+  mainWindow = new BrowserWindow({ show: false });
 
   mainWindow.loadURL(`file://${__dirname}/index.html`);
 
-  mainWindow.on("closed", () => {
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
+
+  mainWindow.on('closed', () => {
     mainWindow = null;
   });
 });
