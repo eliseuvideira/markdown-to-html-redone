@@ -51,9 +51,7 @@ const fileTypeIsSupported = (file) => {
   return ['text/plain', 'text/markdown'].includes(file.type);
 };
 
-// ipc Events
-
-ipcRenderer.on('file-opened', (event, file, content) => {
+const renderFile = (file, content) => {
   filePath = file;
   originalContent = content;
 
@@ -61,6 +59,43 @@ ipcRenderer.on('file-opened', (event, file, content) => {
   renderMarkdownToHTML(content);
 
   updateUserInterface(false);
+};
+
+// ipc Events
+
+ipcRenderer.on('file-opened', (event, file, content) => {
+  if (win.isDocumentEdited()) {
+    const result = remote.dialog.showMessageBox(win, {
+      type: 'warning',
+      title: 'Overwrite Current Unsaved Changes?',
+      message:
+        'Opening a new file in this window will overwrite your unsaved changes. Open this file anyway?',
+      buttons: ['Yes', 'Cancel'],
+      defaultId: 0,
+      cancelId: 1,
+    });
+
+    if (result === 1) {
+      return;
+    }
+  }
+
+  renderFile(file, content);
+});
+
+ipcRenderer.on('file-changed', (event, file, content) => {
+  const result = remote.dialog.showMessageBox(win, {
+    type: 'warning',
+    title: 'Overwrite Current Unsaved Changes?',
+    message: 'Another application has changed this file. Load changes?',
+    buttons: ['Yes', 'Cancel'],
+    defaultId: 0,
+    cancelId: 1,
+  });
+  if (result === 1) {
+    return;
+  }
+  renderFile(file, content);
 });
 
 // Adding Event Listeners
