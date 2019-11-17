@@ -124,6 +124,10 @@ ipcRenderer.on('save-html', () => {
   mainProcess.saveHTML(win, viewHTML.innerHTML);
 });
 
+ipcRenderer.on('show-file', showFile);
+
+ipcRenderer.on('open-in-default', openInDefaultApplication);
+
 // Adding Event Listeners
 
 document.addEventListener('dragstart', (event) => event.preventDefault());
@@ -188,7 +192,7 @@ viewMarkdown.addEventListener('drop', (event) => {
 
 viewMarkdown.addEventListener('contextmenu', (event) => {
   event.preventDefault();
-  markdownContextMenu.popup();
+  createContextMenu().popup();
 });
 
 btnShowFile.addEventListener('click', showFile);
@@ -197,16 +201,24 @@ btnOpenInDefault.addEventListener('click', openInDefaultApplication);
 
 // Context Menu Definition
 
-const markdownContextMenu = Menu.buildFromTemplate([
-  {
-    label: 'Open File',
-    click() {
-      mainProcess.getFileFromUser(win);
+const createContextMenu = () => {
+  return Menu.buildFromTemplate([
+    {
+      label: 'Open File',
+      click() {
+        mainProcess.getFileFromUser(win);
+      },
     },
-  },
-  { type: 'separator' },
-  { label: 'Cut', role: 'cut' },
-  { label: 'Copy', role: 'copy' },
-  { label: 'Paste', role: 'paste' },
-  { label: 'Select All', role: 'selectall' },
-]);
+    { label: 'Show File in Folder', click: showFile, enabled: !!filePath },
+    {
+      label: 'Open in Default Editor',
+      click: openInDefaultApplication,
+      enabled: !!filePath,
+    },
+    { type: 'separator' },
+    { label: 'Cut', role: 'cut' },
+    { label: 'Copy', role: 'copy' },
+    { label: 'Paste', role: 'paste' },
+    { label: 'Select All', role: 'selectall' },
+  ]);
+};

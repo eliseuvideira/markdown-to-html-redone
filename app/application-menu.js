@@ -1,4 +1,4 @@
-const { app, Menu, dialog } = require('electron');
+const { app, Menu, dialog, shell } = require('electron');
 const mainProcess = require('./main');
 
 /** @type {Electron.MenuItemConstructorOptions[]} */
@@ -50,6 +50,31 @@ const template = [
             );
           }
           focusedWindow.webContents.send('save-html');
+        },
+      },
+      { type: 'separator' },
+      {
+        label: 'Show File',
+        click(item, focusedWindow) {
+          if (!focusedWindow) {
+            return dialog.showErrorBox(
+              "Cannot Show File's Location",
+              'There is currently no active documento show.',
+            );
+          }
+          focusedWindow.webContents.send('show-file');
+        },
+      },
+      {
+        label: 'Open in Default Editor',
+        click(item, focusedWindow) {
+          if (!focusedWindow) {
+            return dialog.showErrorBox(
+              "Cannot Show File's Location",
+              'There is currently no active documento show.',
+            );
+          }
+          focusedWindow.webContents.send('open-in-default');
         },
       },
     ],
