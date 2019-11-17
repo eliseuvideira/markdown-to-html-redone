@@ -98,6 +98,14 @@ ipcRenderer.on('file-changed', (event, file, content) => {
   renderFile(file, content);
 });
 
+ipcRenderer.on('save-markdown', () => {
+  mainProcess.saveMarkdown(win, filePath, viewMarkdown.value);
+});
+
+ipcRenderer.on('save-html', () => {
+  mainProcess.saveHTML(win, viewHTML.innerHTML);
+});
+
 // Adding Event Listeners
 
 document.addEventListener('dragstart', (event) => event.preventDefault());
