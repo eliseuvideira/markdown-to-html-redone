@@ -1,5 +1,5 @@
 const marked = require('marked');
-const { remote, ipcRenderer } = require('electron');
+const { remote, ipcRenderer, shell } = require('electron');
 const { Menu } = remote;
 const mainProcess = remote.require('./main.js');
 const path = require('path');
@@ -59,7 +59,24 @@ const renderFile = (file, content) => {
   viewMarkdown.value = content;
   renderMarkdownToHTML(content);
 
+  btnShowFile.disabled = false;
+  btnOpenInDefault.disabled = false;
+
   updateUserInterface(false);
+};
+
+const showFile = () => {
+  if (!filePath) {
+    return alert('This file has not been saved yet!');
+  }
+  shell.showItemInFolder(filePath);
+};
+
+const openInDefaultApplication = () => {
+  if (!filePath) {
+    return alert('This file has not been saved yet!');
+  }
+  shell.openItem(filePath);
 };
 
 // ipc Events
@@ -173,6 +190,10 @@ viewMarkdown.addEventListener('contextmenu', (event) => {
   event.preventDefault();
   markdownContextMenu.popup();
 });
+
+btnShowFile.addEventListener('click', showFile);
+
+btnOpenInDefault.addEventListener('click', openInDefaultApplication);
 
 // Context Menu Definition
 
