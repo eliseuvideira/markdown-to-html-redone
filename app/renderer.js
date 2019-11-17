@@ -1,5 +1,6 @@
 const marked = require('marked');
 const { remote, ipcRenderer } = require('electron');
+const { Menu } = remote;
 const mainProcess = remote.require('./main.js');
 const path = require('path');
 
@@ -167,3 +168,24 @@ viewMarkdown.addEventListener('drop', (event) => {
   viewMarkdown.classList.remove('drag-over');
   viewMarkdown.classList.remove('drag-error');
 });
+
+viewMarkdown.addEventListener('contextmenu', (event) => {
+  event.preventDefault();
+  markdownContextMenu.popup();
+});
+
+// Context Menu Definition
+
+const markdownContextMenu = Menu.buildFromTemplate([
+  {
+    label: 'Open File',
+    click() {
+      mainProcess.getFileFromUser(win);
+    },
+  },
+  { type: 'separator' },
+  { label: 'Cut', role: 'cut' },
+  { label: 'Copy', role: 'copy' },
+  { label: 'Paste', role: 'paste' },
+  { label: 'Select All', role: 'selectall' },
+]);
